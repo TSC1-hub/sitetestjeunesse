@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Éducation en 2025 : Exploration Interactive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Modern Educational Hues -->
+    <!-- Application Structure Plan: Application d'une seule page (SPA) simulant une navigation multipage. Cinq sections principales : Accueil (Introduction), Technologie & IA, Pédagogies & Compétences, Défis & Inégalités, Perspectives & Recommandations. Une barre de navigation permet de basculer entre les sections via JavaScript (affichage/masquage de divs de contenu). Cette structure reflète le déroulement du rapport pour une consommation aisée tout en conservant les avantages d'une SPA (chargement unique, transitions fluides). Les interactions clés incluent des éléments cliquables pour afficher des détails et des graphiques illustratifs pour visualiser les points clés. L'objectif est de rendre le contenu du rapport plus engageant et explorable. -->
+    <!-- Visualization & Content Choices:
+        - Section Accueil (Introduction): Texte formaté. Objectif: Fournir le contexte général du rapport. Méthode: HTML structuré avec Tailwind. Interaction: Navigation. Justification: Présentation claire et directe du contenu introductif.
+        - Section Technologie & IA: Texte, listes à puces, un graphique à barres (Chart.js) illustrant la "Préparation des enseignants à la technologie" (données fictives). Objectif: Expliquer l'impact de la technologie et de l'IA. Méthode: Contenu textuel structuré, visualisation de données pour un aspect spécifique. Interaction: Navigation, survol possible sur termes techniques (non implémenté ici pour simplicité mais envisageable). Justification: Le graphique à barres offre un aperçu visuel d'un défi clé.
+        - Section Pédagogies & Compétences: Texte, listes, un graphique en anneau (Chart.js) sur "L'importance des compétences du 21e siècle" (données fictives), cartes interactives pour les compétences et approches. Objectif: Détailler les nouvelles compétences et méthodes pédagogiques. Méthode: Représentation visuelle des proportions (anneau), éléments interactifs pour l'exploration. Interaction: Clic sur les cartes pour afficher/masquer les descriptions. Justification: L'anneau illustre la répartition, les cartes favorisent l'engagement.
+        - Section Défis & Inégalités: Texte, listes, un graphique à barres groupées (Chart.js) comparant "L'accès aux outils numériques : Urbain vs Rural" (données fictives). Objectif: Souligner les défis majeurs et les inégalités. Méthode: Graphique comparatif pour mettre en évidence les disparités. Interaction: Navigation. Justification: Le graphique illustre clairement les écarts.
+        - Section Perspectives & Recommandations: Texte, listes sous forme d'accordéon pour les recommandations. Objectif: Présenter les solutions et les perspectives d'avenir. Méthode: Listes organisées et interactives. Interaction: Clic pour déplier/replier les détails des recommandations. Justification: Présentation structurée et concise des actions proposées.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            border-bottom-width: 4px;
+        }
+        .chart-container {
+            position: relative; /* Important for Chart.js tooltip positioning */
+            /* height and width will be controlled by Tailwind classes */
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        /* Tailwind Custom Forms (pour une meilleure esthétique des formulaires si besoin, non utilisé ici) */
+        /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'); */
+        /* Using Tailwind's default sans-serif which often includes Inter or a similar system font stack */
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-700">
+
+    <header class="bg-sky-600 text-white shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="text-2xl font-bold">Éducation 2025</a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#accueil" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-sky-100 hover:bg-sky-500 hover:text-white active border-sky-300" data-section="accueil">Accueil</a>
+                        <a href="#tech-ia" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="tech-ia">Technologie & IA</a>
+                        <a href="#pedagogies" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="pedagogies">Pédagogies</a>
+                        <a href="#defis" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="defis">Défis</a>
+                        <a href="#perspectives" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="perspectives">Perspectives</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-sky-100 hover:text-white focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden bg-sky-600">
+            <a href="#accueil" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-sky-100 hover:bg-sky-500 hover:text-white active border-sky-300" data-section="accueil">Accueil</a>
+            <a href="#tech-ia" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="tech-ia">Technologie & IA</a>
+            <a href="#pedagogies" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="pedagogies">Pédagogies</a>
+            <a href="#defis" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="defis">Défis</a>
+            <a href="#perspectives" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-sky-100 hover:bg-sky-500 hover:text-white border-transparent" data-section="perspectives">Perspectives</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <section id="accueil" class="content-section active bg-white p-6 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-sky-600 mb-6">Introduction et Contexte Général</h1>
+            <p class="mb-4">L'année 2025 marque une étape charnière pour le secteur de l'éducation à l'échelle mondiale. Après une période de transformations accélérées, notamment catalysées par des crises sanitaires et une prise de conscience accrue des enjeux climatiques et sociaux, les systèmes éducatifs se trouvent à la croisée des chemins.</p>
+            <p class="mb-4">Nous observons une tension constante entre, d'une part, l'intégration massive des technologies numériques et de l'intelligence artificielle (IA) promettant une personnalisation et une efficacité accrues, et d'autre part, la nécessité impérieuse de renforcer l'équité, l'inclusion et le développement des compétences humaines fondamentales. La pandémie de COVID-19 a agi comme un révélateur et un accélérateur de certaines tendances, mais a également exacerbé des inégalités préexistantes.</p>
+            <p class="mb-4">En 2025, les débats se concentrent sur la manière de construire des systèmes d'apprentissage plus résilients, capables de s'adapter aux changements rapides et de préparer les apprenants de tous âges aux réalités d'un monde complexe et interconnecté. Cette exploration interactive vise à décortiquer les dimensions technologiques, pédagogiques, sociales et économiques de cette évolution.</p>
+             <div class="mt-6 bg-sky-50 p-4 rounded-lg border border-sky-200">
+                <h3 class="text-lg font-semibold text-sky-700 mb-2">Points Clés de l'Introduction :</h3>
+                <ul class="list-disc list-inside space-y-1 text-slate-600">
+                    <li>2025 : Année charnière pour l'éducation mondiale.</li>
+                    <li>Tension : Intégration technologique vs. compétences humaines et équité.</li>
+                    <li>Objectif : Construire des systèmes d'apprentissage résilients et adaptatifs.</li>
+                    <li>Focus : Analyse des tendances, défis et perspectives.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tech-ia" class="content-section bg-white p-6 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-sky-600 mb-6">L'Impact Prédominant de la Technologie et de l'IA</h1>
+            <p class="mb-4">L'année 2025 est indéniablement marquée par l'omniprésence de la technologie dans l'éducation. L'intelligence artificielle (IA) n'est plus un concept futuriste mais un outil intégré, bien que de manière inégale, dans de nombreux processus d'apprentissage.</p>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <h2 class="text-2xl font-semibold text-teal-600 mb-3">Personnalisation par l'IA</h2>
+                    <p class="mb-2">Les systèmes d'apprentissage adaptatif, alimentés par l'IA, ajustent les parcours pédagogiques aux besoins de chaque apprenant et identifient les difficultés. Les tuteurs virtuels offrent un soutien individualisé.</p>
+                    <p class="text-sm text-amber-600">Préoccupations : Qualité/impartialité des algorithmes, protection des données.</p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-teal-600 mb-3">Outils Numériques & Plateformes</h2>
+                    <p class="mb-2">Les environnements d'apprentissage virtuels (EAV) et plateformes collaboratives sont la norme. RV/RA offrent des expériences immersives.</p>
+                    <p class="text-sm text-amber-600">Enjeu : Curation et validation des ressources en ligne.</p>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-semibold text-amber-600 mb-3">Défis de l'Équité d'Accès et de la Formation</h2>
+            <ul class="list-disc list-inside space-y-2 mb-6">
+                <li>Fracture numérique persistante : Accès inégal aux équipements et compétences.</li>
+                <li>Formation des enseignants : Insuffisante pour exploiter pleinement les technologies.</li>
+                <li>Cybersécurité et prévention des risques en ligne (cyberharcèlement, désinformation).</li>
+            </ul>
+            <p class="mb-6 italic">En 2025, l'enjeu est d'intégrer la technologie de manière réfléchie, éthique et équitable.</p>
+
+            <div class="chart-container w-full max-w-xl mx-auto h-72 md:h-80 lg:h-96 p-4 bg-slate-50 rounded-lg shadow">
+                <canvas id="teacherTechChart"></canvas>
+            </div>
+            <p class="text-center text-sm text-slate-500 mt-2">Graphique illustratif : Préparation perçue des enseignants à l'intégration technologique (données fictives).</p>
+        </section>
+
+        <section id="pedagogies" class="content-section bg-white p-6 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-sky-600 mb-6">Évolution des Pédagogies et Compétences du 21e Siècle</h1>
+            <p class="mb-4">Face aux mutations rapides, l'éducation en 2025 met un accent renouvelé sur le développement de compétences transversales, dites "compétences du 21e siècle".</p>
+
+            <h2 class="text-2xl font-semibold text-teal-600 mb-3">Focus sur les Compétences Clés :</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <!-- Cartes interactives pour les compétences -->
+                <div class="card bg-teal-50 p-4 rounded-lg shadow cursor-pointer" data-skill="pensee_critique">
+                    <h3 class="font-semibold text-teal-700">Pensée Critique & Résolution de Problèmes</h3>
+                    <p class="text-sm text-slate-600 skill-desc hidden">Analyser, évaluer, identifier solutions créatives, prendre décisions éclairées.</p>
+                </div>
+                <div class="card bg-teal-50 p-4 rounded-lg shadow cursor-pointer" data-skill="creativite">
+                    <h3 class="font-semibold text-teal-700">Créativité & Innovation</h3>
+                    <p class="text-sm text-slate-600 skill-desc hidden">Générer idées nouvelles, sortir des sentiers battus, transformer concepts.</p>
+                </div>
+                <div class="card bg-teal-50 p-4 rounded-lg shadow cursor-pointer" data-skill="collaboration">
+                    <h3 class="font-semibold text-teal-700">Collaboration & Travail d'Équipe</h3>
+                    <p class="text-sm text-slate-600 skill-desc hidden">Travailler efficacement avec les autres, contextes divers, présentiel ou distance.</p>
+                </div>
+                <div class="card bg-teal-50 p-4 rounded-lg shadow cursor-pointer" data-skill="communication">
+                    <h3 class="font-semibold text-teal-700">Communication</h3>
+                    <p class="text-sm text-slate-600 skill-desc hidden">Maîtriser diverses expressions (orale, écrite, numérique) pour partager et argumenter.</p>
+                </div>
+                <div class="card bg-teal-50 p-4 rounded-lg shadow cursor-pointer" data-skill="litteratie_numerique">
+                    <h3 class="font-semibold text-teal-700">Littératie Numérique & Informationnelle</h3>
+                    <p class="text-sm text-slate-600 skill-desc hidden">Comprendre médias numériques, évaluer sources, utiliser outils techno de manière responsable.</p>
+                </div>
+                <div class="card bg-teal-50 p-4 rounded-lg shadow cursor-pointer" data-skill="adaptabilite">
+                    <h3 class="font-semibold text-teal-700">Adaptabilité & Résilience</h3>
+                    <p class="text-sm text-slate-600 skill-desc hidden">Faire face à l'incertitude, apprendre des erreurs, s'ajuster aux changements.</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h2 class="text-2xl font-semibold text-teal-600 mb-3">Nouvelles Approches Pédagogiques :</h2>
+                    <ul class="list-none space-y-3">
+                        <!-- Cartes interactives pour les approches -->
+                        <li class="card bg-sky-50 p-3 rounded-lg shadow cursor-pointer" data-approach="app">
+                            <h4 class="font-medium text-sky-700">Apprentissage par Projet (APP)</h4>
+                            <p class="text-sm text-slate-600 approach-desc hidden">Projets concrets, interdisciplinaires, mobilisant compétences pour problématique réelle.</p>
+                        </li>
+                        <li class="card bg-sky-50 p-3 rounded-lg shadow cursor-pointer" data-approach="gamification">
+                            <h4 class="font-medium text-sky-700">Apprentissage par le Jeu (Gamification)</h4>
+                             <p class="text-sm text-slate-600 approach-desc hidden">Mécanismes ludiques pour engager et motiver.</p>
+                        </li>
+                        <li class="card bg-sky-50 p-3 rounded-lg shadow cursor-pointer" data-approach="classe_inversee">
+                            <h4 class="font-medium text-sky-700">Classe Inversée</h4>
+                            <p class="text-sm text-slate-600 approach-desc hidden">Contenus théoriques en amont, temps en classe pour échanges et pratique.</p>
+                        </li>
+                        <li class="card bg-sky-50 p-3 rounded-lg shadow cursor-pointer" data-approach="evaluation_formative">
+                            <h4 class="font-medium text-sky-700">Évaluation Formative</h4>
+                            <p class="text-sm text-slate-600 approach-desc hidden">Évaluation continue pour guider l'apprentissage, non sanctionner. Portfolios, auto-évaluations.</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="chart-container w-full max-w-md mx-auto h-64 sm:h-72 md:h-80 p-4 bg-slate-50 rounded-lg shadow">
+                    <canvas id="skillsChart"></canvas>
+                    <p class="text-center text-sm text-slate-500 mt-2">Graphique illustratif : Importance perçue des compétences du 21e siècle (données fictives).</p>
+                </div>
+            </div>
+            <h2 class="text-2xl font-semibold text-teal-600 mb-3">Apprentissage Tout au Long de la Vie</h2>
+            <p>La nécessité de se former continuellement est reconnue. Les offres de formation continue, micro-certifications et parcours flexibles se multiplient.</p>
+        </section>
+
+        <section id="defis" class="content-section bg-white p-6 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-sky-600 mb-6">Défis Majeurs et Inégalités Persistantes</h1>
+            <p class="mb-4">L'éducation en 2025, malgré ses promesses, fait face à des défis structurels et des inégalités qui freinent une éducation équitable et inclusive.</p>
+
+            <div class="space-y-6 mb-8">
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">Fracture Numérique & Disparités Socio-économiques</h2>
+                    <p>L'accès inégal aux technologies et à internet de qualité reste une source majeure d'inégalité, se superposant aux disparités socio-économiques. Les élèves de milieux défavorisés sont particulièrement touchés.</p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">Bien-être Mental des Élèves et Enseignants</h2>
+                    <p>Pression scolaire, anxiété, cyberharcèlement impactent la santé mentale. Les ressources de prise en charge sont souvent insuffisantes. Les enseignants subissent aussi un stress important.</p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">Adaptation aux Crises & Résilience</h2>
+                    <p>Les systèmes sont éprouvés par les crises (COVID-19, climat). La résilience des infrastructures et la continuité pédagogique sont cruciales.</p>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-amber-600 mb-2">Financement de l'Éducation</h2>
+                    <p>Les investissements publics sont souvent insuffisants pour couvrir tous les besoins (infrastructures, salaires, innovation).</p>
+                </div>
+            </div>
+             <p class="mb-6 italic">Relever ces défis demande volonté politique, stratégies concertées et investissements ciblés.</p>
+
+            <div class="chart-container w-full max-w-xl mx-auto h-72 md:h-80 lg:h-96 p-4 bg-slate-50 rounded-lg shadow">
+                <canvas id="accessChart"></canvas>
+            </div>
+            <p class="text-center text-sm text-slate-500 mt-2">Graphique illustratif : Accès aux outils numériques (données fictives).</p>
+        </section>
+
+        <section id="perspectives" class="content-section bg-white p-6 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold text-sky-600 mb-6">Perspectives d'Avenir et Recommandations</h1>
+            <p class="mb-4">Malgré les défis, 2025 offre des perspectives prometteuses si des actions concertées sont entreprises pour capitaliser sur les innovations et s'attaquer aux inégalités.</p>
+
+            <h2 class="text-2xl font-semibold text-teal-600 mb-3">Vers une Éducation Plus Inclusive et Personnalisée :</h2>
+            <ul class="list-disc list-inside space-y-1 mb-4">
+                <li>Renforcer le soutien aux élèves à besoins particuliers et issus de milieux défavorisés.</li>
+                <li>Développer des approches pédagogiques différenciées.</li>
+                <li>Utiliser l'IA de manière éthique pour la personnalisation.</li>
+            </ul>
+
+            <h2 class="text-2xl font-semibold text-teal-600 mb-3">Construire des Systèmes Éducatifs Résilients :</h2>
+            <ul class="list-disc list-inside space-y-1 mb-6">
+                <li>Investir dans des infrastructures scolaires durables et technologies robustes.</li>
+                <li>Former à la gestion de crise et à l'adaptabilité.</li>
+                <li>Intégrer l'éducation au développement durable (EDD).</li>
+            </ul>
+
+            <h2 class="text-2xl font-semibold text-sky-700 mb-4">Recommandations Clés pour l'Action :</h2>
+            <div class="space-y-3">
+                <!-- Accordéon pour les recommandations -->
+                <div class="accordion-item bg-sky-50 border border-sky-200 rounded-lg">
+                    <button class="accordion-header w-full text-left p-4 font-medium text-sky-700 hover:bg-sky-100 focus:outline-none flex justify-between items-center">
+                        1. Investissement Stratégique et Soutenu
+                        <span class="transform transition-transform duration-300 text-sky-500">&#9662;</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-sky-200 text-sm text-slate-600">
+                        Augmenter significativement et durablement les financements publics, en ciblant la réduction des inégalités, la formation/revalorisation des enseignants, et l'accès aux technologies pour tous.
+                    </div>
+                </div>
+                <div class="accordion-item bg-sky-50 border border-sky-200 rounded-lg">
+                    <button class="accordion-header w-full text-left p-4 font-medium text-sky-700 hover:bg-sky-100 focus:outline-none flex justify-between items-center">
+                        2. Formation Continue et Valorisation des Enseignants
+                         <span class="transform transition-transform duration-300 text-sky-500">&#9662;</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-sky-200 text-sm text-slate-600">
+                        Programmes ambitieux de développement professionnel continu (nouvelles pédagogies, technologies, gestion de la diversité, bien-être). Revaloriser statut et conditions de travail.
+                    </div>
+                </div>
+                <div class="accordion-item bg-sky-50 border border-sky-200 rounded-lg">
+                    <button class="accordion-header w-full text-left p-4 font-medium text-sky-700 hover:bg-sky-100 focus:outline-none flex justify-between items-center">
+                        3. Développement de l'Équité Numérique
+                         <span class="transform transition-transform duration-300 text-sky-500">&#9662;</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-sky-200 text-sm text-slate-600">
+                        Plans nationaux pour garantir un accès équitable aux équipements numériques, connexion internet de qualité, et contenus pédagogiques pertinents pour tous, surtout les plus vulnérables.
+                    </div>
+                </div>
+                 <div class="accordion-item bg-sky-50 border border-sky-200 rounded-lg">
+                    <button class="accordion-header w-full text-left p-4 font-medium text-sky-700 hover:bg-sky-100 focus:outline-none flex justify-between items-center">
+                        4. Renforcement des Partenariats
+                         <span class="transform transition-transform duration-300 text-sky-500">&#9662;</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-sky-200 text-sm text-slate-600">
+                        Encourager la collaboration (gouvernements, institutions éducatives, secteur privé, société civile, organisations internationales) pour partager bonnes pratiques, co-construire solutions innovantes, mobiliser ressources.
+                    </div>
+                </div>
+                 <div class="accordion-item bg-sky-50 border border-sky-200 rounded-lg">
+                    <button class="accordion-header w-full text-left p-4 font-medium text-sky-700 hover:bg-sky-100 focus:outline-none flex justify-between items-center">
+                        5. Priorité au Bien-être et à la Santé Mentale
+                         <span class="transform transition-transform duration-300 text-sky-500">&#9662;</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-sky-200 text-sm text-slate-600">
+                        Intégrer programmes de soutien psychosocial dans tous les établissements. Former personnels à la détection et accompagnement des élèves en difficulté. Promouvoir un environnement scolaire bienveillant.
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-8 text-center italic text-slate-600">L'éducation en 2025 est un domaine dynamique. Les choix d'aujourd'hui détermineront la capacité des générations futures à s'épanouir et à contribuer à un monde plus juste et durable.</p>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8 text-center mt-12">
+        <p>&copy; 2025 Exploration de l'Éducation. Rapport Prospectif.</p>
+        <p class="text-sm">Application générée pour une exploration interactive.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function setActiveSection(sectionId) {
+                sections.forEach(section => {
+                    if (section.id === sectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.dataset.section === sectionId) {
+                        link.classList.add('active', 'border-sky-300');
+                        link.classList.remove('border-transparent');
+                    } else {
+                        link.classList.remove('active', 'border-sky-300');
+                        link.classList.add('border-transparent');
+                    }
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const sectionId = this.dataset.section;
+                    setActiveSection(sectionId);
+                    if (mobileMenu.classList.contains('block')) {
+                        mobileMenu.classList.remove('block');
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('block');
+            });
+            
+            // Initial active section based on hash or default to 'accueil'
+            const initialSection = window.location.hash ? window.location.hash.substring(1) : 'accueil';
+            if (document.getElementById(initialSection)) {
+                 setActiveSection(initialSection);
+            } else {
+                 setActiveSection('accueil');
+            }
+
+
+            // Helper for Chart.js label wrapping
+            function wrapText(context, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let line = '';
+                for(let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = context.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        context.fillText(line, x, y);
+                        line = words[n] + ' ';
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                context.fillText(line, x, y);
+            }
+            
+            function formatLabel(label, maxLength = 16) {
+                if (typeof label !== 'string') return label;
+                if (label.length > maxLength) {
+                    const parts = [];
+                    for (let i = 0; i < label.length; i += maxLength) {
+                        parts.push(label.substring(i, i + maxLength));
+                    }
+                    return parts;
+                }
+                return label;
+            }
+
+            // Chart 1: Teacher Tech Preparedness
+            const teacherTechCtx = document.getElementById('teacherTechChart')?.getContext('2d');
+            if (teacherTechCtx) {
+                new Chart(teacherTechCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Faiblement préparés', 'Moyennement préparés', 'Hautement préparés'],
+                        datasets: [{
+                            label: 'Préparation des enseignants (fictif)',
+                            data: [40, 35, 25],
+                            backgroundColor: ['#F59E0B', '#14B8A6', '#0284C7'],
+                            borderColor: ['#D97706', '#0D9488', '#0369A1'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Pourcentage (%)' }
+                            },
+                            x: {
+                                ticks: { callback: function(value) { return formatLabel(this.getLabelForValue(value));} }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: 'Préparation des Enseignants à la Technologie', font: {size: 16} }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Importance of 21st Century Skills
+            const skillsCtx = document.getElementById('skillsChart')?.getContext('2d');
+            if (skillsCtx) {
+                new Chart(skillsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pensée Critique', 'Créativité', 'Collaboration', 'Communication', 'Litt. Numérique', 'Adaptabilité'],
+                        datasets: [{
+                            label: 'Importance des Compétences (fictif)',
+                            data: [20, 15, 20, 15, 20, 10],
+                            backgroundColor: ['#0284C7', '#14B8A6', '#F59E0B', '#6366F1', '#EC4899', '#84CC16'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            title: { display: true, text: 'Importance des Compétences du 21e Siècle', font: {size: 14} }
+                        }
+                    }
+                });
+            }
+            
+            // Interactive cards for skills
+            document.querySelectorAll('.card[data-skill]').forEach(card => {
+                card.addEventListener('click', () => {
+                    const desc = card.querySelector('.skill-desc');
+                    desc.classList.toggle('hidden');
+                });
+            });
+
+            // Interactive cards for approaches
+            document.querySelectorAll('.card[data-approach]').forEach(card => {
+                card.addEventListener('click', () => {
+                    const desc = card.querySelector('.approach-desc');
+                    desc.classList.toggle('hidden');
+                });
+            });
+
+
+            // Chart 3: Digital Access Urban vs Rural
+            const accessCtx = document.getElementById('accessChart')?.getContext('2d');
+            if (accessCtx) {
+                new Chart(accessCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Accès Ordinateurs', 'Accès Internet Haut Débit'],
+                        datasets: [
+                            {
+                                label: 'Milieu Urbain (%) (fictif)',
+                                data: [85, 90],
+                                backgroundColor: '#0284C7',
+                                borderColor: '#0369A1',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Milieu Rural (%) (fictif)',
+                                data: [60, 65],
+                                backgroundColor: '#F59E0B',
+                                borderColor: '#D97706',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: { display: true, text: 'Pourcentage d\'accès (%)' }
+                            },
+                             x: {
+                                ticks: { callback: function(value) { return formatLabel(this.getLabelForValue(value));} }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Accès aux Outils Numériques : Urbain vs Rural', font: {size: 16} }
+                        }
+                    }
+                });
+            }
+
+            // Accordion for recommendations
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('span');
+                    
+                    // Close other accordions in the same group if needed (optional)
+                    // header.closest('.space-y-3').querySelectorAll('.accordion-content').forEach(c => {
+                    //    if (c !== content) { c.style.maxHeight = null; c.previousElementSibling.querySelector('span').style.transform = 'rotate(0deg)';}
+                    // });
+
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
